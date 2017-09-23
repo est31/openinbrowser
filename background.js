@@ -105,9 +105,10 @@ function headerRecv(responseDetails) {
 		if (obj.name.toLowerCase() === "content-disposition" &&
 				obj.value.startsWith("attachment")) {
 			// https://stackoverflow.com/a/23054920
-			filename =
-
-/filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/.exec(obj.value)[1];
+			var regexRes = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/.exec(obj.value);
+			if (regexRes) {
+				filename = regexRes[1];
+			}
 			return true;
 		}
 		return false;
