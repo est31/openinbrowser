@@ -131,7 +131,7 @@ function headerRecv(responseDetails) {
 		filename: filename,
 		mode: mode,
 	};
-	var url = dispositionPage + "#" + encodeURIComponent(JSON.stringify(params));
+	var url = dispositionPage + "#" + btoa(JSON.stringify(params));
 
 	browser.tabs.update(responseDetails.tabId, {url: url});
 
