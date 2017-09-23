@@ -24,7 +24,7 @@
  * ***** END LICENSE BLOCK ***** */
 
 function getParams() {
-	return JSON.parse(decodeURIComponent(window.location.hash.substring(1)));
+	return JSON.parse(atob(window.location.hash.substring(1)));
 }
 
 function action(ev) {
