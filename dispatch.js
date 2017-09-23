@@ -68,23 +68,6 @@ function buildDropdown(choices) {
 	}
 }
 
-var choices = [
-	"text/plain",
-	"application/pdf",
-	// Note:
-	// For image mime types, it relies on the fact that Gecko will correctly
-	// display an image even if the server sent it with a mime type that does not
-	// match the real image type. For instance, a PNG image sent with
-	// image/jpeg Content-Type will still be displayed properly.
-	"image/png",
-	"text/html",
-	// Only supported in Firefox 57 onward.
-	// Until we require Firefox 57 we check the browser version first.
-	//"view-source",
-	"application/json",
-	"text/xml",
-];
-
 function makeChoice(i) {
 	chosenMime = choices[i];
 	var chosenName = browser.i18n.getMessage(chosenMime);
@@ -93,23 +76,10 @@ function makeChoice(i) {
 
 var chosenMime;
 
-buildDropdown(choices);
-makeChoice(0);
-
-function maybeDisplayViewSource(browserInfo) {
-	if (browserInfo.name !== "Firefox") {
-		return;
-	}
-	var intMajor = parseInt(browserInfo.version.split(".")[0]);
-	if (intMajor < 57) {
-		return;
-	}
-	choices.splice(4, 0, "view-source");
+getChoices(function() {
 	buildDropdown(choices);
 	makeChoice(0);
-}
-
-browser.runtime.getBrowserInfo().then(maybeDisplayViewSource);
+});
 
 function dropdownAction(ev) {
 	var i = ev.target.number;
