@@ -77,7 +77,7 @@ function headerRecv(responseDetails) {
 			var newHeaders = responseDetails.responseHeaders.filter(function(obj){
 				return obj.name.toLowerCase() !== "content-disposition";
 			});
-			if (action.mime) {
+			if (action.mime && (action.mime !== "server-sent-mime")) {
 				newHeaders = newHeaders.map(function(obj){
 					if (obj.name.toLowerCase() === "content-type") {
 						obj.value = action.mime;
@@ -172,35 +172,57 @@ browser.webRequest.onHeadersReceived.addListener(
 	["blocking", "responseHeaders"]
 );
 
+function handleDisposition(msg, tab) {
+	console.log("Handling disposition message: ", msg);
+	var tabId = tab.id;
+	var createEntry = true;
+	switch (msg.action.kind) {
+		case "download":
+			// Launch the download
+			browser.downloads.download({url: msg.url});
+			break;
+		case "open":
+			// Just re-send the request.
+			if (msg.action.mime === "view-source") {
+				createEntry = false;
+				browser.tabs.update(tabId, {url: "view-source:" + msg.url});
+			} else {
+				browser.tabs.update(tabId, {url: msg.url});
+			}
+			break;
+		case "dialog":
+			// Just re-send the request.
+			browser.tabs.update(tabId, {url: msg.url});
+			break;
+	}
+	if (createEntry) {
+		urlActions[msg.url] = msg.action;
+	}
+}
+
 function handleMessage(data, sender, sendResponse) {
 	if (sender.url.startsWith(dispositionPage)) {
-		var tabId = sender.tab.id;
-		console.log("Message from the page: ",
-			data);
-		var createEntry = true;
-		switch (data.action.kind) {
-			case "download":
-				// Launch the download
-				browser.downloads.download({url: data.url});
-				break;
-			case "open":
-				// Just re-send the request.
-				if (data.action.mime === "view-source") {
-					createEntry = false;
-					browser.tabs.update(tabId, {url: "view-source:" + data.url});
-				} else {
-					browser.tabs.update(tabId, {url: data.url});
-				}
-				break;
-			case "dialog":
-				// Just re-send the request.
-				browser.tabs.update(tabId, {url: data.url});
-				break;
-		}
-		if (createEntry) {
-			urlActions[data.url] = data.action;
-		}
+		handleDisposition(data, sender.tab);
 	}
 }
 
 browser.runtime.onMessage.addListener(handleMessage);
+
+getChoices(function() {
+	// Only include this into the background script
+	choices.splice(0, 0, "server-sent-mime");
+
+	for (i in choices) {
+		browser.contextMenus.create({
+			id: choices[i],
+			title: browser.i18n.getMessage(choices[i]),
+			contexts: ["link"],
+		});
+	}
+	browser.contextMenus.onClicked.addListener((info, tab) => {
+		var mime = info.menuItemId;
+		var url = info.linkUrl;
+		var msg = {url: url, action: { kind: "open", mime: mime }};
+		handleDisposition(msg, tab);
+	});
+});

@@ -12,10 +12,11 @@
   "default_locale": "en",
 
   "permissions": [
-    "webRequest", "webRequestBlocking", "tabs", "downloads", "<all_urls>"
+    "webRequest", "webRequestBlocking", "tabs",
+    "downloads", "<all_urls>", "contextMenus"
   ],
 
   "background": {
-    "scripts": ["background.js"]
+    "scripts": ["choices.js", "background.js"]
   }
 }
