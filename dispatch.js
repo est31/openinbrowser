@@ -78,7 +78,9 @@ var choices = [
 	// image/jpeg Content-Type will still be displayed properly.
 	"image/png",
 	"text/html",
-	"view-source",
+	// Only supported in Firefox 57 onward.
+	// Until we require Firefox 57 we check the browser version first.
+	//"view-source",
 	"application/json",
 	"text/xml",
 ];
@@ -93,6 +95,21 @@ var chosenMime;
 
 buildDropdown(choices);
 makeChoice(0);
+
+function maybeDisplayViewSource(browserInfo) {
+	if (browserInfo.name !== "Firefox") {
+		return;
+	}
+	var intMajor = parseInt(browserInfo.version.split(".")[0]);
+	if (intMajor < 57) {
+		return;
+	}
+	choices.splice(4, 0, "view-source");
+	buildDropdown(choices);
+	makeChoice(0);
+}
+
+browser.runtime.getBrowserInfo().then(maybeDisplayViewSource);
 
 function dropdownAction(ev) {
 	var i = ev.target.number;
