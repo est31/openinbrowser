@@ -9,8 +9,7 @@ You can install the extension from its [addons.mozilla.org page](https://addons.
 
 ## Configuration
 
-You can add additional mime types to the list by creating a pref named `extensions.openinbrowser.additional_mimes` in about:config with the list of additional types separated by a `|`.
-For instance, `application/pdf|audio/ogg-vorbis`.
+There is no way to configure the Add-on yet.
 
 ## Limitations and Issues
 
