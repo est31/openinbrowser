@@ -104,10 +104,29 @@ function headerRecv(responseDetails) {
 	var mayDownload = responseDetails.responseHeaders.some(function(obj) {
 		if (obj.name.toLowerCase() === "content-disposition" &&
 				obj.value.startsWith("attachment")) {
-			// https://stackoverflow.com/a/23054920
-			var regexRes = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/.exec(obj.value);
-			if (regexRes) {
-				filename = regexRes[1];
+			try {
+				// try RFC 6266-compliant parsing first
+				let parsed = contentDisposition.parse(obj.value);
+				filename = parsed.parameters.filename;
+			} catch (e) {
+				// fallback to simple parsing if failed
+				// https://stackoverflow.com/a/23054920
+				var regexRes = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/.exec(obj.value);
+				if (regexRes) {
+					// Some websites use filenames in UTF-8 directly. Firefox turns them into ISO-8859-1
+					// "Historically, HTTP has allowed field content with text in the ISO-8859-1 charset"
+					// Ref: https://tools.ietf.org/html/rfc7230#section-3.2.4
+					// The decodeURIComponent + escape trick turns ISO-8859-1 encoded strings into UTF-8
+					try {
+						filename = decodeURIComponent(escape(regexRes[1]));
+					} catch(e) {
+						console.error(e);
+						return false;
+					}
+				} else {
+					console.error(e);
+					return false;
+				}
 			}
 			return true;
 		}
@@ -131,7 +150,7 @@ function headerRecv(responseDetails) {
 		filename: filename,
 		mode: mode,
 	};
-	var url = dispositionPage + "#" + btoa(JSON.stringify(params));
+	var url = dispositionPage + "#" + btoa(unescape(encodeURIComponent(JSON.stringify(params))));
 
 	browser.tabs.update(responseDetails.tabId, {url: url});
 

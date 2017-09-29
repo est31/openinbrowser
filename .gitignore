@@ -1,2 +1,6 @@
 /.idea
 /*.xpi
+
+node_modules
+
+/content-disposition.js

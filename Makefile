@@ -5,4 +5,8 @@ TARGET_XPI = $(NAME)-$(VERSION).xpi
 xpi:
 	git archive --format zip -o $(TARGET_XPI) HEAD -- .
 
-.PHONY: xpi
+all:
+	npm install
+	npm run build
+
+.PHONY: xpi all
