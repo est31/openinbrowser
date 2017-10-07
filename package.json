@@ -1,0 +1,8 @@
+{
+  "dependencies": {
+    "content-disposition": "^0.5.2"
+  },
+  "scripts": {
+    "build": "browserify content-disposition-in.js > ./content-disposition.js"
+  }
+}

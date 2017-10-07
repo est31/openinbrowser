@@ -17,6 +17,6 @@
   ],
 
   "background": {
-    "scripts": ["choices.js", "background.js"]
+    "scripts": ["choices.js", "background.js", "content-disposition.js"]
   }
 }
